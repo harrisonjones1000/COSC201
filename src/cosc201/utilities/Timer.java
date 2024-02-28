@@ -95,6 +95,11 @@ public class Timer {
     running = false;
   }
 
+  /**
+   * Return the time taken for the last run of this timer in milliseconds.
+   * 
+   * @return Time (in milliseconds) for the last run of this timer.
+   */
   public long getTimeInMs() {
     return getTime()/MILLION;
   }
