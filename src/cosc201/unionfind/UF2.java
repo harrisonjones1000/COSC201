@@ -52,8 +52,8 @@ public class UF2 implements UnionFind {
   }
 
   /**
-   * Join the groups containing two elements by setting all the representatives
-   * for elements of the first group to the representative of the second group.
+   * Join the groups containing two elements by finding their representatives, and setting
+   * the representative of the second one to be the representative of the first one.
    * 
    * @param x the first element
    * @param y the second element
