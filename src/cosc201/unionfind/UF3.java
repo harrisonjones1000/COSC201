@@ -87,7 +87,7 @@ public class UF3 implements UnionFind {
       reps[y] = x;
     } else if (rank[y] > rank[x]) {
       reps[x] = y;
-    } else {
+    } else { // ranks are equal
       reps[x] = y;
       rank[y]++;
     }
