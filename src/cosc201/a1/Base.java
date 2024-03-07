@@ -62,6 +62,17 @@ public class Base {
     }
     return 1 + row * cols + col;
   }
+
+  /**
+   * Returns the neighbours of the cell at the given index.
+   * @param index the given index
+   * @return the indices of its neighbours
+   */
+  public int[] getNeighbours(int index) {
+    int row = (index - 1) / cols;
+    int col = (index - 1) % cols;
+    return getNeighbours(row, col);
+  }
   
   /**
    * Returns an array of the indices of the neighbors of a given cell.
