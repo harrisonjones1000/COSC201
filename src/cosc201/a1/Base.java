@@ -33,6 +33,20 @@ public class Base {
   public Base(int size) {
       this(size, size);
   }
+
+  /** A getter for rows.
+   * @return the number of rows in the base
+   */
+  public int getRows() {
+    return rows;
+  }
+
+  /** A getter for columns.
+   * @return the number of columns in the base
+   */
+  public int getCols() {
+    return cols;
+  }
     
   /**
    * Returns the index of the specified row and column in the base.
