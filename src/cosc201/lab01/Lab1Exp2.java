@@ -1,6 +1,9 @@
 package cosc201.lab01;
 
 import java.util.Random;
+import java.util.ArrayList;
+import java.util.List;
+import cosc201.utilities.*;
 
 /**
  * Lab 1 Experiment 2
@@ -24,7 +27,26 @@ public class Lab1Exp2 {
   static final Random R = new Random();
 
   public static void main(String[] args) {
-    // Write and run your experiments here. Remember to use a Timer.    
+    long time = 0;
+    Timer t = new Timer();
+
+    for(int i = 2; i<66000; i=i*2){
+      t.start();
+      String e = randString1(i);
+      time = t.stop();
+
+      t.start();
+      e = randString2(i);
+      time = t.stop();
+      
+      t.start();
+      e = randString3(i);
+      time = t.stop();
+
+      List<Long> array = t.getTimes();
+      System.out.println(i + "\t" + array.get(0) + "\t\t" + array.get(1) + "\t\t" + array.get(2));
+      t.reset();
+    }
   }
 
   static String randString1(int n) {

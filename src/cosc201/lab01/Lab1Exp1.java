@@ -1,6 +1,7 @@
 package cosc201.lab01;
 
 import java.util.Random;
+import cosc201.utilities.*;
 
 /**
  * Lab 1, Experiment 1
@@ -20,21 +21,43 @@ public class Lab1Exp1 {
   static final Random R = new Random();
   
   public static void main(String[] args) {
-    // Add some code here that evaluates and times sum(n) and sum(10*n) for 
-    // (various) n so that you can answer the questions above.
+    /* 
+    double egg = 0;
+    int k = 100000;
+    for(int i = 0; i<k; i++){
+      egg += sum(1000)/(sum(100));
+    }
+    
+    System.out.println(egg/k);
+
+    Exp1 Q1. typically gives a ratio 9.44
+    Should be 10
+    */
+
+    double egg = 0;
+    int k = 75;
+    int n = 10;
+    while(egg<10){
+      for(int i = 0; i<k; i++){
+        egg += sum(10*n)/sum(n);
+      }
+      egg = egg/k;
+      System.out.println(egg);
+      n=2*n;
+      System.out.println(n);
+    }
+    System.out.println(egg);
   }
   
   
-  static double sum(int n) {
+  static long sum(int n) {
     double result = 0;
-    for(int i = 0; i < n; i++) result += R.nextDouble();
-    return result;
-  }
-  
-  static double timedSum(int n) {
-    // It might be easier to wrap together the timing control and the sum
-    // and just return the time taken. Up to you!
-    return 0.0; // Just so that this compiles
+    Timer t = new Timer();
+    t.start();
+    for(int i = 0; i < n; i++){
+      result += R.nextDouble();
+    }
+    return t.stop();
   }
   
 }
