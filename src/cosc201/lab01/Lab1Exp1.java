@@ -1,6 +1,7 @@
 package cosc201.lab01;
 
 import java.util.Random;
+import cosc201.utilities.Timer;
 
 /**
  * Lab 1, Experiment 1
@@ -20,21 +21,29 @@ public class Lab1Exp1 {
   static final Random R = new Random();
   
   public static void main(String[] args) {
-    // Add some code here that evaluates and times sum(n) and sum(10*n) for 
-    // (various) n so that you can answer the questions above.
+    double t = 0;
+    int n = 100;
+    for(int i = 0; i < n; i++){
+      t += timedSum(1000)/timedSum(100);
+    }
+    System.out.println(t/n);
+
   }
   
   
-  static double sum(int n) {
+  static double sum(int n){
     double result = 0;
-    for(int i = 0; i < n; i++) result += R.nextDouble();
+    for(int i = 0; i < n; i++){ 
+      result += R.nextDouble();
+    }
     return result;
   }
   
   static double timedSum(int n) {
-    // It might be easier to wrap together the timing control and the sum
-    // and just return the time taken. Up to you!
-    return 0.0; // Just so that this compiles
+    Timer timer = new Timer();
+    timer.start();
+    double result = sum(n);
+    return timer.stop(); 
   }
   
 }
