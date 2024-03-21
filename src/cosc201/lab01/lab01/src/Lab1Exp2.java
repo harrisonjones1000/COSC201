@@ -1,7 +1,6 @@
-package cosc201.lab01;
+
 
 import java.util.Random;
-import java.util.ArrayList;
 import java.util.List;
 import cosc201.utilities.*;
 

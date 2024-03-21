@@ -94,14 +94,14 @@ public class TableauChecker {
     public static boolean isSetOf1toN(int[][] t){
       int cells = 0;
       ArrayList<Integer> array = new ArrayList<Integer>();
-      for(int i = 0; i<t.length; i++){
+      for(int i = 0; i < t.length; i++){
         cells += t[i].length;
         for(int j = 0; j < t[i].length; j++){
           array.add(t[i][j]);
         }
       }
 
-      for(int k = 0; k < cells; k++){
+      for(int k = 1; k < cells; k++){
         if(!array.contains(k)){
           return false;
         }
