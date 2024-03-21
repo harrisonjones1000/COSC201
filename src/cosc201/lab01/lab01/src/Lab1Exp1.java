@@ -1,7 +1,7 @@
 package cosc201.lab01;
 
 import java.util.Random;
-import cosc201.utilities.*;
+import cosc201.utilities.Timer;
 
 /**
  * Lab 1, Experiment 1
