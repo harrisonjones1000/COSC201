@@ -10,7 +10,7 @@ package cosc201.a1;
  */
 public class Base {
    
-  private static final int OCEAN = 0;
+  public static final int OCEAN = 0;
   private int rows;
   private int cols;
 
