@@ -38,8 +38,8 @@ public interface WordBank {
    * Add a word to the bank with the given value. If the word is not valid, or
    * the value is negative throw an IllegalArgumentException.
    * 
-   * @param word
-   * @param value
+   * @param word A word to be added to the bank
+   * @param value Its value
    */
   public void addWord(String word, long value);
 
@@ -48,8 +48,8 @@ public interface WordBank {
    * invalid words but if the value is negative throw an 
    * IllegalArgumentException.
    * 
-   * @param words
-   * @param value
+   * @param words A collection of words to be added to the bank
+   * @param value Their common value
    */
   public void addWords(Collection<String> words, long value);
 
@@ -57,7 +57,7 @@ public interface WordBank {
    * Remove a word from the bank. If the word is invalid or not in
    * the bank, do nothing.
    * 
-   * @param word
+   * @param word A word to be removed from the bank
    */
   public void removeWord(String word);
 
@@ -81,8 +81,8 @@ public interface WordBank {
    * Return the words in the bank with values in the range lowValue inclusive to
    * highValue exclusive.
    * 
-   * @param lowValue
-   * @param highValue
+   * @param lowValue The lowest value (inclusive)
+   * @param highValue The highest value (exclusive)
    * @return The words in the bank with values in the range lowValue to highValue.
    */
   public Set<String> getWords(long lowValue, long highValue);
