@@ -1,4 +1,6 @@
 package cosc201.lab02;
+import cosc201.utilities.*;
+import java.util.List;
 
 /**
  * Lab 2, Experiment 1
@@ -18,7 +20,31 @@ package cosc201.lab02;
 public class Lab2Exp1 {
 
   public static void main(String[] args) {
-    // Add your code for doing experiments here.
+    Timer t = new Timer();
+    long bruh;
+    long n;
+    for(int i=1; i < 50; i++){
+      t.start();
+      n = fibRec(i);
+      bruh = t.stop(); 
+
+      t.start();
+      n = fibA(i);
+      bruh = t.stop();
+
+      t.start();
+      n = fibB(i);
+      bruh = t.stop();
+
+      t.start();
+      n = fibC(i);
+      bruh = t.stop();
+
+      List<Long> array = t.getTimes();
+      System.out.println(i +"\t" + array.get(1) + "\t" + array.get(2)+ "\t" + array.get(3) + "\t" + array.get(0)*10e-9);
+      t.reset();
+    }
+
   }
    
   static long fibRec(int n) {
