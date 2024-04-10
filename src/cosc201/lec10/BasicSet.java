@@ -18,7 +18,7 @@ public class BasicSet<T> {
     public static final int DEFAULT_CAPACITY = 10;
     private static final int NOT_FOUND = -1;
     
-    private T[] elements;
+    private T[] storage;
     private int size;
     
     public BasicSet() {
@@ -27,18 +27,22 @@ public class BasicSet<T> {
     
     @SuppressWarnings("unchecked")
     public BasicSet(int capacity) {
-      elements = (T[]) new Object[capacity];
+      storage = (T[]) new Object[capacity];
       this.size = 0;
     }
 
     public boolean isEmpty() {
       return size == 0;
+    }  
+    
+    public int size() {
+      return size;
     }
     
     public boolean add(T t) {
       if (this.contains(t)) return false;
-      if (size == elements.length) enhanceCapacity();
-      elements[size] = t;
+      if (size == storage.length) increaseCapacity();
+      storage[size] = t;
       size++;
       return true;    
     }
@@ -50,42 +54,39 @@ public class BasicSet<T> {
     public boolean remove(T t) {
       int i = this.getIndex(t);
       if (i == NOT_FOUND) return false;
-      elements[i] = elements[size-1];
+      storage[i] = storage[size-1];
       size--;
       return true;
     }
     
     private int getIndex(T t) {
       for(int i = 0; i < size; i++) {
-        if (elements[i].equals(t)) return i;
+        if (storage[i].equals(t)) return i;
       }
       return NOT_FOUND;
     }
     
-    private void enhanceCapacity() {
+    private void increaseCapacity() {
       @SuppressWarnings("unchecked")
-      T[] newElements = (T[]) new Object[elements.length * 2];
+      T[] newStorage = (T[]) new Object[storage.length * 2];
       for(int i = 0; i < size; i++) {
-        newElements[i] = elements[i];
+        newStorage[i] = storage[i];
       }
-      elements = newElements;
+      storage = newStorage;
     }
 
     public String toString() {
       StringBuilder result = new StringBuilder();
       result.append("{");
       for(int i = 0; i < size; i++) {
-        result.append(elements[i]);
+        result.append(storage[i]);
         if (i < size - 1) result.append(", ");
       }
       result.append("}");
       return result.toString();
     }
 
-    public int size() {
-      return size;
-    }
-
+  
   
   }
 
