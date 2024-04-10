@@ -1,0 +1,3 @@
+If current working directory is src
+
+javadoc -d "../doc" -sourcepath .  -subpackages cosc201

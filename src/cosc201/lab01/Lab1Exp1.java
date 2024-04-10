@@ -20,6 +20,7 @@ public class Lab1Exp1 {
   static final Random R = new Random();
   
   public static void main(String[] args) {
+    System.out.println("haha");
     // Add some code here that evaluates and times sum(n) and sum(10*n) for 
     // (various) n so that you can answer the questions above.
   }
