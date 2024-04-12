@@ -157,6 +157,11 @@ public class BST {
     return result;
   }
 
+  /**
+   * Returns a string representation of the tree. The tree is printed with
+   * the root at the left, and left children lie below a node, right children
+   * above it. So the tree is read from the root down, left to right.
+   */
   public String toString() {
     if (isEmpty()) return "<>";
     StringBuilder result = new StringBuilder();
@@ -215,6 +220,7 @@ public class BST {
     delete(n);
     root.key = s;
   }
+  
   // Adds the string contained in a node together with a suitable padding
   // prefix to a StringBuilder -- used in toString()
   private void addString(Node n, StringBuilder result, String prefix) {
@@ -305,6 +311,12 @@ public class BST {
     return result;
   }
 
+  /*
+   * An alternative way to print the tree. This method uses a different
+   * approach to the problem of printing the tree. It prints the tree
+   * with the root at the top.
+   * 
+   */
     public String altToString() {
       ArrayList<String> lines = rectangleBelow(root);
       StringBuilder result = new StringBuilder();
