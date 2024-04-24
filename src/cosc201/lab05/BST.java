@@ -38,12 +38,14 @@ public class BST {
   public boolean add(String s) {
     if (isEmpty()) {
       root = new Node(s);
+      root.height=0;
       return true;
     }
     Node parent = null, child = this.root;
     while (child != null) {
       if (child.key.equals(s)) return false;
       parent = child;
+
       if (parent.key.compareTo(s) < 0) {
         child = parent.right;
       } else {
@@ -51,6 +53,15 @@ public class BST {
       }
     }
     addLink(parent, new Node(s));
+    int height = 1;
+    if(parent.height<height) parent.height = height;
+    parent.size++;
+    while(parent.parent!=null){
+      parent = parent.parent;
+      height++;
+      if(parent.height<height) parent.height = height;
+      parent.size++;
+    }
     return true;
   }
 
@@ -183,21 +194,73 @@ public class BST {
   // Delete a node
   // Assumption: n is not null
   private void delete(Node n) {
+    //is root
     if (n == root) {
       deleteRoot(); return;
     }
-    if (n.left == null) {
-      addLink(n.parent, n.right, linkType(n.parent, n));
+    Node parent = n.parent;
+    int height;
+
+    
+    if(n.left==null&&n.right==null){ //n has no children
+      if(parent.right.key.equals(n.key)) parent.right=null;
+      parent.left=null;
+      n.parent=null;
+
+      if(parent.left==null&&parent.right==null){//if parent has no children, parent height is 0
+        parent.height = 0;
+      }
+      height = parent.height; //parent other child not null, parent height as supposed to be
+      parent.size--;
+
+      while(parent.parent!=null){
+        parent=parent.parent;
+        parent.size--;
+        height++; //the height the next parent should be
+        
+        if(parent.right==null) parent.height = parent.left.height+1;
+        else if(parent.left==null) parent.height = parent.right.height+1;
+        else if(parent.right.height<height&&parent.left.height<height){
+          parent.height = height;
+        }//if left or right greater/equal to supposed height, parent is correct height
+      }
       return;
     }
-    if (n.right == null) {
-      addLink(n.parent, n.left, linkType(n.parent, n));
+
+    if((n.left == null&&n.right != null)||(n.left != null&&n.right == null)){ //one child
+      if(n.left == null){
+
+        addLink(n.parent, n.right, linkType(n.parent, n)); //connects child to parent.right
+        //if left side smaller than, null, or same height as right, parent decrease by 1, otherwise parent correct height
+        if(parent.left==null) parent.height--;
+        else if(parent.left.height<=parent.right.height) parent.height--;
+      }else{
+        addLink(n.parent, n.left, linkType(n.parent, n));
+        if(parent.right==null) parent.height--;
+        else if(parent.right.height<=parent.left.height) parent.height--;
+      }
+      
+      height = parent.height;
+      parent.size--;
+
+      while(parent.parent!=null){
+        parent=parent.parent;
+        parent.size--;
+        height++;
+        
+        if(parent.right==null) parent.height = parent.left.height+1;
+        else if(parent.left==null) parent.height = parent.right.height+1;
+        else if(parent.right.height<height&&parent.left.height<height){
+          parent.height = height;
+        }
+      }
       return;
     }
-    Node sn = successor(n);
+    //2 children
+    Node sn = successor(n); //finds right subtrees minimum value, sn
     String s = sn.key;
-    delete(sn);
-    n.key = s;
+    delete(sn); //deletes it
+    n.key = s; //sets node
   }
 
   // Delete the root. This is a special case because the root's
@@ -233,6 +296,7 @@ public class BST {
 
   // Finds the successor of a node, used in the 'difficult' delete case.
   // Assumption: n has a non-null right child.
+  // Finds the minimum value in the nodes right subtree.
   private Node successor(Node n) {
     Node result = n.right;
     while (result.left != null) {
@@ -268,10 +332,14 @@ public class BST {
   private void addLink(Node parent, Node child, boolean type) {
     if (type == RIGHT) {
       parent.right = child;
+      
     } else {
       parent.left = child;
     }
-    if (child != null) child.parent = parent;
+    if (child != null){
+      System.out.println("haha");
+      child.parent = parent;
+    }
   }
 
   private ArrayList<String> rectangleBelow(Node n) {
@@ -329,14 +397,34 @@ public class BST {
       return result.toString();
     }
 
+    public int size(String s){
+      Node n = findNode(s, root);
+      if (n==null) return 0;
+      return n.size;
+    }
+
+    public int height(String s){
+      Node n = findNode(s, root);
+      if (n==null) return -1;
+      return n.height;
+    }
+
+    public static BST makeBalanced(String[] dictionary){
+      BST t = new BST();
+      return t;
+    }
+
   private class Node {
     Node parent = null;
     Node left = null;
     Node right = null;
     String key;
+    int size;
+    int height;
    
     Node(String key) {
       this.key = key;
+      this.size=1;
     }
  
   }
