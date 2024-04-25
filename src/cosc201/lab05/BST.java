@@ -1,6 +1,7 @@
 package cosc201.lab05;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.ArrayDeque;
 
 /**
@@ -15,7 +16,7 @@ public class BST {
   private static final boolean LEFT = true;
   private Node root = null;
 
-  public BST() {};
+  public BST(){};
 
   public boolean isEmpty() {
     return root == null;
@@ -409,9 +410,63 @@ public class BST {
       return n.height;
     }
 
+    public String[] toArray(ArrayList<String> s){
+      String[] arr = new String[s.size()];
+      arr = s.toArray(arr);
+      return arr;
+    }
+
     public static BST makeBalanced(String[] dictionary){
       BST t = new BST();
+      System.out.println(Arrays.toString(dictionary));
+      int midpoint = (dictionary.length)/2;
+      t.add(dictionary[midpoint]);
+      makeBalanced(Arrays.copyOfRange(dictionary, 0, midpoint-1), t);
+      makeBalanced(Arrays.copyOfRange(dictionary, midpoint+1, dictionary.length-1), t);
       return t;
+    }
+
+    public static void makeBalanced(String[] subArray, BST t){
+      if(subArray.length==1){
+        t.add(subArray[0]);
+        return;
+      }
+      int midpoint = subArray.length/2;
+      t.add(subArray[midpoint]);
+      makeBalanced(Arrays.copyOfRange(subArray, 0, midpoint), t);
+      if(midpoint+1!=subArray.length) makeBalanced(Arrays.copyOfRange(subArray, midpoint+1, subArray.length), t);
+    }
+
+    public String next(String s){
+      boolean condition = false;
+      Node n = this.root;
+      while(n!=null){
+        if(n.key.compareTo(s)==0){
+          condition = true;
+          break;
+        };
+
+        if(n.parent!=null){
+          if(n.parent.key.compareTo(s)<0&&n.key.compareTo(s)>0){
+            n=n.parent;
+            condition = true;
+            break;
+          }
+        }
+
+        if (n.key.compareTo(s) < 0){
+          n=n.right;
+        }else if (n.key.compareTo(s) > 0){
+          n=n.left;
+        }
+      }
+      if(condition){
+        n=n.right;
+        while(n.left!=null) n=n.left;
+        return n.key;
+      }
+      return null;
+
     }
 
   private class Node {
