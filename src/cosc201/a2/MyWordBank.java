@@ -3,7 +3,7 @@ package cosc201.a2;
 import java.util.*;
 
 public class MyWordBank implements WordBank{
-  private HashMap<String, Node> nodes = new HashMap<>();
+  public HashMap<String, Node> nodes = new HashMap<>();
   private Node root = null;
   private static final long NOT_FOUND = -1;
 
@@ -37,7 +37,7 @@ public class MyWordBank implements WordBank{
       if(n!=null){ //if word already exists
         if(n.getValue()==value){
           n.count++;
-        }else{ //if word doesnt share same value, remove old Node from tree and map, re add
+        }else{ //if word doesnt share same value, remove old Node from BST and map, re add
           Node w = new Node(value, word, n.count++);
           removeWord(n.word);
           nodes.put(word,w);
@@ -114,7 +114,9 @@ public class MyWordBank implements WordBank{
    */
   public void removeWord(String word){
     Node n = nodes.get(word);
-    if(n==null) return;
+    if(n==null){
+      return;
+    }
     if(n == root){ //n is root
       if(root.left == null){
         root=root.right;
@@ -123,52 +125,69 @@ public class MyWordBank implements WordBank{
         root = root.left;
         root.parent = null;
       }else{
-        Node sn = successor(n); //right subtrees minimum value
-        removeWord(sn.word);
+        Node sn = successor(n); //finds right subtrees minimum value, sn
+        if(n.right!=sn){
+          sn.parent.left=sn.right;
+          if(sn.right!=null) sn.right.parent=sn.parent;
+          sn.right=n.right;
+          n.right.parent=sn;
+        }
+        sn.left=n.left;
+        n.left.parent=sn;
+        
+        root=sn;
         sn.parent=null;
-        sn.left = root.left;
-        sn.right = root.right;
-        root = sn;
-        nodes.put(sn.word,sn);
       }
       nodes.put(word,null);
       return;
     }
-    Node parent = n.parent;
+
     if(n.left==null&&n.right==null){ //n has no children
-      if(parent.right.word.equals(n.word)) parent.right=null;
-      parent.left=null;
+      if(n.parent.right!=null&&n.parent.right.word.equals(n.word)){
+        n.parent.right=null;
+        n.parent=null;
+      }else{
+        n.parent.left=null;
+      }
       n.parent=null;
 
-      parent.size--;
-      while(parent.parent!=null){
-        parent=parent.parent;
-        parent.size--;
-      }
-    }else if((n.left == null&&n.right != null)||(n.left != null&&n.right == null)){ //one child
-      if(n.left == null){
-        if(parent.right.word.equals(n.word)) parent.right=n.right;
-        parent.left=n.right;
+    }else if(n.left==null&&n.right != null){//one child on right
+      if(n.parent.right!=null&&n.parent.right.word.equals(n.word)){
+        n.parent.right=n.right;
       }else{
-        if(parent.right.word.equals(n.word)) parent.right=n.left;
-        parent.left=n.left;
+        n.parent.left=n.right;
       }
+      n.right.parent=n.parent;
 
-      parent.size--;
-      while(parent.parent!=null){
-        parent=parent.parent;
-        parent.size--;  
+    }else if(n.left != null&&n.right == null){//one child on left
+      if(n.parent.right!=null&&n.parent.right.word.equals(n.word)){
+        n.parent.right=n.left;
+      }else{
+        n.parent.left=n.left;
       }
+      n.left.parent=n.parent;
     }else{ //2 children
       Node sn = successor(n); //finds right subtrees minimum value, sn
+      if(n.right!=sn){
+        sn.parent.left=sn.right;
+        if(sn.right!=null) sn.right.parent=sn.parent;
+        sn.right=n.right;
+        n.right.parent=sn;
+      }
       sn.left=n.left;
-      sn.right=n.right;
+      n.left.parent=sn;
       sn.parent=n.parent;
+
+      if(n.parent.right!=null) if(n.parent.right.word.equals(n.word)){
+        n.parent.right=sn;
+      }else{
+        n.parent.left = sn;
+      }
     }
     nodes.put(word,null);
   }
 
-  private Node successor(Node n) {
+  public Node successor(Node n) {
     Node result = n.right;
     while (result.left != null) {
       result = result.left;
@@ -182,7 +201,14 @@ public class MyWordBank implements WordBank{
    * 
    * @param words The collection of words to remove
    */
-  public void removeWords(Collection<String> words){}
+  public void removeWords(Collection<String> words){
+    Iterator<String> iterator = words.iterator();
+    while(iterator.hasNext()){
+      String word = iterator.next();
+      removeWord(word);
+      
+    }
+  }
 
   /**
    * Return the words in the bank of the given value.
@@ -191,7 +217,20 @@ public class MyWordBank implements WordBank{
    * @return The words in the bank of that value.
    */
   public Set<String> getWords(long value){
-    return new HashSet<String>();
+    Set<String> s = new HashSet<String>();
+    getWords(value, s, root);
+    return s;
+  }
+
+  public void getWords(long value, Set<String> s, Node n){
+    if(n==null) return;
+    if(Long.compare(n.getValue(), value)>0) getWords(value, s, n.left);
+    else if(Long.compare(n.getValue(), value)<0) getWords(value, s, n.right);
+    else if(Long.compare(n.getValue(), value)==0){
+      s.add(n.word);
+      getWords(value, s, n.left);
+      getWords(value, s, n.right);
+    }
   }
 
   /**
@@ -203,7 +242,25 @@ public class MyWordBank implements WordBank{
    * @return The words in the bank with values in the range lowValue to highValue.
    */
   public Set<String> getWords(long lowValue, long highValue){
-    return new HashSet<String>();
+    Set<String> s = new HashSet<String>();
+    getWords(lowValue, highValue, s, root);
+    return s;
+  }
+
+  public void getWords(long lowValue, long highValue, Set<String> s, Node n){
+    if(n==null) return;
+    int a = Long.compare(n.getValue(), lowValue);
+    int b = Long.compare(n.getValue(), highValue);
+
+    if(a>=0&&b==-1){
+      s.add(n.word);
+      getWords(lowValue, highValue, s, n.left);
+      getWords(lowValue, highValue, s, n.right);
+    }if(a==-1){//if node less than lowValue, go right
+      getWords(lowValue, highValue, s, n.right); 
+    }else if(b>=0){ //if node greater than highValue, go left
+      getWords(lowValue, highValue, s, n.left);
+    }
   }
 
   /**
@@ -306,7 +363,6 @@ public class MyWordBank implements WordBank{
   public class Node{
     long value;
     String word;
-    int size;
     int count;
     Node parent = null;
     Node left = null;
@@ -315,14 +371,12 @@ public class MyWordBank implements WordBank{
     Node(long value, String word){
       this.value=value;
       this.word=word;
-      this.size=1;
       this.count=1;
     }
 
     Node(long value, String word, int count){
       this.value=value;
       this.word=word;
-      this.size=1;
       this.count=count;
     }
 
