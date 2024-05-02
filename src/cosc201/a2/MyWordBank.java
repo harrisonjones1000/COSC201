@@ -2,11 +2,12 @@ package cosc201.a2;
 
 import java.util.*;
 
-public class MyClass implements WordBank{
-  private Word root = null;
+public class MyWordBank implements WordBank{
+  private HashMap<String, Node> nodes = new HashMap<>();
+  private Node root = null;
   private static final long NOT_FOUND = -1;
 
-  public MyClass(){}
+  public MyWordBank(){}
 
     /**
    * Returns the value associated with the word, or NOT_FOUND if the word is not
@@ -16,57 +17,71 @@ public class MyClass implements WordBank{
    * @return The word's value or NOT_FOUND
    */
   public long getValue(String word){
-    return getValue(word, root);
-  }
-
-  public long getValue(String word, Word n){
-    if (n == null) return NOT_FOUND;
-    if(n.word.equals(word)) return n.value;
-
-    long l = getValue(word, n.left);
-    long r = getValue(word, n.right);
-
-    if(l==NOT_FOUND&&r==NOT_FOUND) return NOT_FOUND;
-    if(l==NOT_FOUND) return r;
-    return l;
+    if(nodes.get(word)==null) return NOT_FOUND;
+    return nodes.get(word).getValue();
   }
 
   /**
    * Add a word to the bank with the given value. If the word is not valid, or
    * the value is negative throw an IllegalArgumentException.
    * 
+   * Multiple of the same word can be added. If a word already has a value, adding 
+   * another instance of the word with a new value will override the previous value.
+   * 
    * @param word A word to be added to the bank
    * @param value Its value
    */
   public void addWord(String word, long value){
-    if((isValidWord(word)&&value>=0)||getValue(word)!=NOT_FOUND){
-      Word w = new Word(word, value);
-      if(root==null){
-        root = w;
-      }else{
-        Word parent = root;
-        Word child = root;
-        while(child!=null){
-          if (Long.compare(child.getValue(), w.getValue())>0){ 
-            child = parent.right;
-          }else{
-            child = parent.left;
-          }
+    if((isValidWord(word)&&value>=0)){
+      Node n = nodes.get(word);
+      if(n!=null){ //if word already exists
+        if(n.getValue()==value){
+          n.count++;
+        }else{ //if word doesnt share same value, remove old Node from tree and map, re add
+          Node w = new Node(value, word, n.count++);
+          removeWord(n.word);
+          nodes.put(word,w);
+          add(w); 
         }
-        addLink(parent, w);
+      }else{ //word doesnt already exist
+        n = new Node(value, word);
+        nodes.put(word, n);
+        add(n);
       }
     }else{
       throw new IllegalArgumentException();
     }
   }
 
-  public void addLink(Word parent, Word child){
-    child.parent = parent;
-    if(Long.compare(child.getValue(),parent.getValue())>0){
-      parent.left = child;
+  /**
+   * Adds a Node to the BST
+   * @param n the Node to add
+   */
+  public void add(Node n){
+    if(root==null){
+      root = n;
     }else{
-      parent.right = child;
+      Node parent = root;
+      Node child = root;
+      while(child!=null){
+        parent=child;
+        if (Long.compare(n.getValue(), child.getValue())>0){ //if input greater than node, go right
+          child = parent.right;
+        }else{ //if input less than or equal to node, move left 
+          child = parent.left; 
+        }
+      }
+      addLink(parent, n);
     }
+  }
+  
+  public void addLink(Node parent, Node n){
+    if(Long.compare(n.getValue(), parent.getValue())>0){
+      parent.right=n;
+    }else{
+      parent.left=n;
+    }
+    n.parent = parent;
   }
 
   /**
@@ -80,7 +95,7 @@ public class MyClass implements WordBank{
   public void addWords(Collection<String> words, long value){
     if(value>=0){
       Iterator<String> iterator = words.iterator();
-        while (iterator.hasNext()){
+        while(iterator.hasNext()){
           String word = iterator.next();
           if(isValidWord(word)){
             addWord(word, value);
@@ -90,13 +105,76 @@ public class MyClass implements WordBank{
       throw new IllegalArgumentException();
     }
   }
+
   /**
    * Remove a word from the bank. If the word is invalid or not in
    * the bank, do nothing.
    * 
    * @param word A word to be removed from the bank
    */
-  public void removeWord(String word){}
+  public void removeWord(String word){
+    Node n = nodes.get(word);
+    if(n==null) return;
+    if(n == root){ //n is root
+      if(root.left == null){
+        root=root.right;
+        root.parent=null;
+      }else if (root.right == null){
+        root = root.left;
+        root.parent = null;
+      }else{
+        Node sn = successor(n); //right subtrees minimum value
+        removeWord(sn.word);
+        sn.parent=null;
+        sn.left = root.left;
+        sn.right = root.right;
+        root = sn;
+        nodes.put(sn.word,sn);
+      }
+      nodes.put(word,null);
+      return;
+    }
+    Node parent = n.parent;
+    if(n.left==null&&n.right==null){ //n has no children
+      if(parent.right.word.equals(n.word)) parent.right=null;
+      parent.left=null;
+      n.parent=null;
+
+      parent.size--;
+      while(parent.parent!=null){
+        parent=parent.parent;
+        parent.size--;
+      }
+    }else if((n.left == null&&n.right != null)||(n.left != null&&n.right == null)){ //one child
+      if(n.left == null){
+        if(parent.right.word.equals(n.word)) parent.right=n.right;
+        parent.left=n.right;
+      }else{
+        if(parent.right.word.equals(n.word)) parent.right=n.left;
+        parent.left=n.left;
+      }
+
+      parent.size--;
+      while(parent.parent!=null){
+        parent=parent.parent;
+        parent.size--;  
+      }
+    }else{ //2 children
+      Node sn = successor(n); //finds right subtrees minimum value, sn
+      sn.left=n.left;
+      sn.right=n.right;
+      sn.parent=n.parent;
+    }
+    nodes.put(word,null);
+  }
+
+  private Node successor(Node n) {
+    Node result = n.right;
+    while (result.left != null) {
+      result = result.left;
+    }
+    return result;
+  }
 
   /**
    * Remove a collection of words from the bank. Ignore any words that are not
@@ -225,34 +303,84 @@ public class MyClass implements WordBank{
     return 0;
   }
 
-  public class Word{
-    private String word;
-    private long value;
-    Word parent = null;
-    Word left = null;
-    Word right = null;
+  public class Node{
+    long value;
+    String word;
     int size;
+    int count;
+    Node parent = null;
+    Node left = null;
+    Node right = null;
 
-    Word(String word, long value){
-      this.word = word;
+    Node(long value, String word){
       this.value=value;
+      this.word=word;
       this.size=1;
+      this.count=1;
     }
 
-    public String getWord(){
-      return this.word;
+    Node(long value, String word, int count){
+      this.value=value;
+      this.word=word;
+      this.size=1;
+      this.count=count;
     }
 
     public long getValue(){
       return this.value;
     }
 
-    public void setWord(String word){
-      if(isValidWord(word)) this.word=word;
-    }
-
     public void setValue(long value){
       if(value>=0) this.value = value;
     }
+  }
+
+  public String altToString() {
+    ArrayList<String> lines = rectangleBelow(root);
+    StringBuilder result = new StringBuilder();
+    for (String line : lines) {
+      result.append(line);
+      result.append("\n");
+    }
+    // Delete the final newline character
+    if (result.length() > 0) result.deleteCharAt(result.length() - 1);
+    return result.toString();
+  }
+
+  private ArrayList<String> rectangleBelow(Node n) {
+    ArrayList<String> result = new ArrayList<>();
+    if (n == null) return result;
+    ArrayList<String> left = rectangleBelow(n.left);
+    ArrayList<String> right = rectangleBelow(n.right);
+    int leftWidth = 0;
+    int rightWidth = 0;
+    if (!left.isEmpty()) {
+      leftWidth = left.get(0).length();
+    }
+    if (!right.isEmpty()) {
+      rightWidth = right.get(0).length();
+    }
+    int keyWidth = n.word.length();
+    // Make a string of leftWidth spaces
+    String leftPadding = " ".repeat(leftWidth);
+    String rightPadding = " ".repeat(rightWidth);
+    String midPadding = " ".repeat(keyWidth);
+    result.add(leftPadding + n.word + rightPadding);
+    for(int i = 0; i < Math.max(left.size(), right.size()); i++) {
+      String thisLine = "";
+      if (i < left.size()) {
+        thisLine += left.get(i);
+      } else {
+        thisLine += leftPadding;
+      }
+      thisLine += midPadding;
+      if (i < right.size()) {
+        thisLine += right.get(i);
+      } else {
+        thisLine += rightPadding;
+      }
+      result.add(thisLine);
+    }
+    return result;
   }
 }
