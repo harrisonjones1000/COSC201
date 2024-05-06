@@ -114,9 +114,8 @@ public class MyWordBank implements WordBank{
    */
   public void removeWord(String word){
     Node n = nodes.get(word);
-    if(n==null){
-      return;
-    }
+    if(n==null) return;
+
     if(n == root){ //n is root
       if(root.left == null){
         root=root.right;
@@ -125,18 +124,7 @@ public class MyWordBank implements WordBank{
         root = root.left;
         root.parent = null;
       }else{
-        Node sn = successor(n); //finds right subtrees minimum value, sn
-        if(n.right!=sn){
-          sn.parent.left=sn.right;
-          if(sn.right!=null) sn.right.parent=sn.parent;
-          sn.right=n.right;
-          n.right.parent=sn;
-        }
-        sn.left=n.left;
-        n.left.parent=sn;
-        
-        root=sn;
-        sn.parent=null;
+        awesomeMethod(n);
       }
       nodes.put(word,null);
       return;
@@ -167,32 +155,48 @@ public class MyWordBank implements WordBank{
       }
       n.left.parent=n.parent;
     }else{ //2 children
-      Node sn = successor(n); //finds right subtrees minimum value, sn
-      if(n.right!=sn){
-        sn.parent.left=sn.right;
-        if(sn.right!=null) sn.right.parent=sn.parent;
-        sn.right=n.right;
-        n.right.parent=sn;
-      }
-      sn.left=n.left;
-      n.left.parent=sn;
-      sn.parent=n.parent;
-
-      if(n.parent.right!=null) if(n.parent.right.word.equals(n.word)){
-        n.parent.right=sn;
-      }else{
-        n.parent.left = sn;
-      }
+      awesomeMethod(n);
     }
     nodes.put(word,null);
   }
 
+  /*
+   * Find the successor of a node, aka the right subtrees leftmost node.
+   */
   public Node successor(Node n) {
     Node result = n.right;
     while (result.left != null) {
       result = result.left;
     }
     return result;
+  }
+
+  /**
+   * Replaces a node n, when node n has 2 children, with its successor
+   * @param n the node needed to be removed
+   */
+  public void awesomeMethod(Node n){
+    Node sn = successor(n); //finds right subtrees minimum value, sn
+    if(n.right!=sn){
+      sn.parent.left=sn.right;
+      if(sn.right!=null) sn.right.parent=sn.parent;
+      sn.right=n.right;
+      n.right.parent=sn;
+    }
+    sn.left=n.left;
+    n.left.parent=sn;
+    
+    if(n==root){
+      root=sn;
+      sn.parent=null;
+    }else{
+      sn.parent=n.parent;
+      if(n.parent.right!=null) if(n.parent.right.word.equals(n.word)){
+        n.parent.right=sn;
+      }else{
+        n.parent.left = sn;
+      }
+    }
   }
 
   /**
@@ -289,7 +293,20 @@ public class MyWordBank implements WordBank{
    * @return A word of maximum value among the words in the collection.
    */
   public String getMaximumWord(Collection<String> words){
-    return "";
+    Iterator<String> iterator = words.iterator();
+    String word = iterator.next();
+    Long max = null;
+    String curr = null;
+    while(iterator.hasNext()){
+      word = iterator.next();
+      if(nodes.get(word)!=null){
+        if(max==null||nodes.get(word).getValue()>max){
+          max = nodes.get(word).getValue();
+          curr = word;
+        }
+      }
+    }
+    return curr;
   }
 
   /**
@@ -305,7 +322,20 @@ public class MyWordBank implements WordBank{
    * @return A word of minimum value among the words in the collection
    */
   public String getMinimumWord(Collection<String> words){
-    return "";
+    Iterator<String> iterator = words.iterator();
+    String word = iterator.next();
+    Long min = null;
+    String curr = null;
+    while(iterator.hasNext()){
+      word = iterator.next();
+      if(nodes.get(word)!=null){
+        if(min==null||nodes.get(word).getValue()<min){
+          min = nodes.get(word).getValue();
+          curr = word;
+        }
+      }
+    }
+    return curr;
   }
 
   /**
@@ -325,7 +355,11 @@ public class MyWordBank implements WordBank{
    * @return A word of median value among the words in the collection
    */
   public String getMedianWord(Collection<String> words){
-    return "";
+    Pair[] p = getSortedPairs(words);
+    if (p==null) return null;
+    int l = p.length;
+    if(l%2!=0) return p[(l-1)/2].word;
+    return p[l/2].word;
   }
 
   /**
@@ -344,7 +378,44 @@ public class MyWordBank implements WordBank{
    * @return A word of nearest to mean value among the words in the collection
    */
   public String getMeanWord(Collection<String> words){
-    return "";
+    Pair[] p = getSortedPairs(words);
+    if (p==null) return null;
+    int l = p.length;
+    long total = 0;
+    for(int i=0; i<l; i++){
+      total+=p[i].value;
+    }
+    double mean = (double)(total/l);
+    int lowest = 0;
+    for(int i=1; i<l; i++){
+      if(Math.abs(p[lowest].value-mean)>Math.abs(p[i].value-mean)) lowest = i;
+    }
+    return p[lowest].word;
+  }
+
+  /**
+   * Generates a pair array of valid words in the wordbank, from lowest to highest values
+   * 
+   * @param words A collection of words
+   * @return a sorted pair array
+   */
+  public Pair[] getSortedPairs(Collection<String> words){
+    int l = words.size();
+    String[] array = words.toArray(new String[l]);
+    Pair[] p = new Pair[l];
+    int d = 0;
+    for(int i = 0; i < l; i++){
+      if(nodes.get(array[i])==null){
+        d++;
+      }else{
+        p[i-d] = new Pair(array[i], nodes.get(array[i]).getValue());
+      }
+    }
+    l=l-d;
+    if (l==0) return null;
+    p = Arrays.copyOfRange(p,0,l);
+    Arrays.sort(p);
+    return p;
   }
 
   /**
@@ -357,9 +428,40 @@ public class MyWordBank implements WordBank{
    * @return The value of the document
    */
   public long getDocumentValue(Collection<String> words){
-    return 0;
+    int l = words.size();
+    long value = 0;
+    String[] array = words.toArray(new String[l]);
+    for(int i=0; i<l; i++){
+      if(nodes.get(array[i])!=null) value += nodes.get(array[i]).getValue();
+    }
+    return value;
   }
 
+  /**
+   * For the given wordbank, generates a collection of unique words in the wordbank
+   * 
+   * @return a collection of words
+   */
+  public Collection<String> getDocument(){
+    Collection<String> s = new HashSet<String>();
+    getDocument(s, root);
+    return s;
+  }
+
+  public void getDocument(Collection<String> s, Node n){
+    if(n==null) return;
+    s.add(n.word);
+    getDocument(s, n.left);
+    getDocument(s, n.right);
+  }
+
+  /**
+   * Node class holds the value of a word, the word itself and how many of that word exist in the wordbank.
+   * 
+   * It also stores its relations to other nodes in the implemented BST, that is sorted based on word values.
+   * 
+   * Has accessor and mutator methods for value.
+   */
   public class Node{
     long value;
     String word;
@@ -389,6 +491,29 @@ public class MyWordBank implements WordBank{
     }
   }
 
+  /**
+   * Pair class stores values of a word and its value
+   * It implements the Comparable interface which compares the pairs long value to another.
+   * This is my favourite class.
+   */
+  public class Pair implements Comparable<Pair>{
+    String word;
+    long value;
+
+    Pair(String word, long value){
+      this.word = word;
+      this.value = value;
+    }
+
+    public int compareTo(Pair p){
+      return Long.compare(this.value,p.value);
+    }
+  }
+
+  /*
+   * Method gives a visual representation of the BST as a String
+   * very awesome
+   */
   public String altToString() {
     ArrayList<String> lines = rectangleBelow(root);
     StringBuilder result = new StringBuilder();
